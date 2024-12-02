@@ -1,11 +1,13 @@
 package main
 
 import (
-	"encoding/json"
-	"github.com/google/uuid"
 	"log"
 	"net/http"
 	"os"
+	"sample-api/handler"
+	"sample-api/repository"
+	"sample-api/routes"
+	"sample-api/service"
 )
 
 //TIP To run your code, right-click the code and select <b>Run</b>. Alternatively, click
@@ -14,9 +16,12 @@ import (
 func main() {
 	// Create Handler
 	mux := http.NewServeMux()
-	// Assign handlers or controllers
-	mux.HandleFunc("POST /users", addUser)
-	mux.HandleFunc("GET /users", listUsers)
+	// Dependencies injection
+	userRepository := repository.NewUserRepository()
+	userService := service.NewUserService(userRepository)
+	userHandler := handler.NewUserHandler(userService)
+
+	routes.RegisterUserRoutes(mux, userHandler)
 
 	port := os.Getenv("PORT")
 
@@ -29,48 +34,3 @@ func main() {
 	// Start the server
 	log.Fatal(server.ListenAndServe())
 }
-
-func addUser(w http.ResponseWriter, r *http.Request) {
-	// idPath := r.URL.Path // users/{id}
-	// idQuery := r.URL.Query().Get("id") // users?id=12312
-	// Parse request JSON to struct
-	var userRequest UserRequest
-	err := json.NewDecoder(r.Body).Decode(&userRequest)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	// Create model user
-	user := User{
-		ID:   uuid.New().String(),
-		Name: userRequest.Name,
-	}
-	// Add user to users list
-	usersList = append(usersList, user)
-
-	// Write response
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	_ = json.NewEncoder(w).Encode(user)
-}
-
-func listUsers(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	_ = json.NewEncoder(w).Encode(usersList)
-}
-
-// UserRequest request in handler
-type UserRequest struct {
-	Name string `json:"name"`
-}
-
-// User model
-type User struct {
-	ID   string
-	Name string
-}
-
-// List of users, to simulate repository
-var usersList []User = make([]User, 0)
