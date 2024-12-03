@@ -3,7 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
-	"sample-api/model"
+	"sample-api/internal/model"
 )
 
 type UserHandler struct {
@@ -31,7 +31,11 @@ func (u *UserHandler) AddUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
-		_ = json.NewEncoder(w).Encode("error")
+		_ = json.NewEncoder(w).Encode(model.GlobalResponse{
+			Message: "No procesado",
+			Error:   err.Error(),
+		})
+		return
 	}
 
 	// Write Ok
