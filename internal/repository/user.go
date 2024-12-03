@@ -27,12 +27,14 @@ func (u *userRepository) Add(user *model.User) (*model.User, error) {
 
 func (u *userRepository) List() ([]*model.User, error) {
 	var userList []*model.User
-	rows, err := u.db.Query("SELECT id, name FROM users")
-	defer rows.Close()
+	rows, err := u.db.Query("SELECT id, name FROM userss")
 	if err != nil {
+		// logueas y haces algo
+		// lo devuelves
 		return nil, err
 	}
 
+	defer rows.Close() // Llama al final de la funcion
 	for rows.Next() {
 		var user model.User
 		err := rows.Scan(
@@ -53,7 +55,7 @@ func (u *userRepository) ExistByName(name string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	
+
 	if rows.Next() {
 		return true, nil
 	}
